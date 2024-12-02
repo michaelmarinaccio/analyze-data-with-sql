@@ -1,0 +1,58 @@
+#-----------------------------creating usage funnels-----------------------------
+
+Visitors to Codecademy’s website follow a simple workflow:
+
+  Browse items available for sale
+  Click an icon to begin the checkout process
+  Enter payment information to complete their purchase
+
+Not all users who browse on the website will find something that they like enough to checkout, and not all users who begin the checkout process will 
+finish entering their payment information to make a purchase.
+
+This type of multi-step process where some users leave at each step is called a funnel.
+
+Catherine wants to determine what percent of users make it through each step of the funnel so that she can recommend improvements to Codecademy’s website.
+Catherine is going to combine data from three different tables:
+
+  browse - gives the timestamps of users who visited different item description pages
+  checkout - gives the timestamps of users who visited the checkout page
+  purchase - gives the timestamps of when users complete their purchase
+
+Using SQL, she finds that 24% of all users who browse move on to checkout. 89% of those who reach checkout purchase.
+
+#-----------------------------analyzing user churn-----------------------------
+
+Next, Catherine wants to take a look at the churn rate.
+
+A churn rate is the percent of subscribers to a monthly service who have canceled. For example, in January, let’s say Codecademy has 1,000 customers. 
+In February, 200 learners sign up, and 250 cancel.
+
+SELECT COUNT(DISTINCT user_id) AS enrollments,
+	COUNT(CASE
+       	WHEN strftime("%m", cancel_date) = '03'
+        THEN user_id
+  END) AS march_cancellations,
+ 	ROUND(100.0 * COUNT(CASE
+       	WHEN strftime("%m", cancel_date) = '03'
+        THEN user_id
+  END) / COUNT(DISTINCT user_id)) AS churn_rate
+FROM pro_users
+WHERE signup_date < '2017-04-01'
+	AND (
+    (cancel_date IS NULL) OR
+    (cancel_date > '2017-03-01')
+  );
+
+#-----------------------------determining web traffic attribution-----------------------------
+
+Catherine’s boss asks her to analyze how users are finding Codecademy’s websites using UTM Parameters. UTM Parameters are special tags that site owners add 
+to their pages to track what website a user was on before they reach the website. For instance:
+
+If a user found Codecademy’s website through Google search, the table page_visits might have utm_source set to ‘google’.
+If a different user clicked a Facebook ad to get to Codecademy’s website, then their row in page_visits might have utm_source as ‘facebook’.
+
+ SELECT utm_source,
+ 	COUNT(DISTINCT user_id) AS num_users
+FROM page_visits
+GROUP BY 1
+ORDER BY 2 DESC;
